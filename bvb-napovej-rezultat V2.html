@@ -71,7 +71,9 @@
       z-index: 1;
       max-width: 520px;
       margin: 0 auto;
-      padding: 2rem 18px 3rem;
+      padding: 1.2rem 18px 3rem;
+      display: flex;
+      flex-direction: column;
     }
 
     /* ─── HEADER BADGE ─── */
@@ -81,6 +83,8 @@
       justify-content: center;
       gap: 8px;
       margin-bottom: 14px;
+      position: relative;
+      padding: 0 80px;
     }
     .eyebrow-line {
       flex: 1;
@@ -181,8 +185,15 @@
       place-items: center;
       position: relative;
     }
-    /* Diagonal slash behind logo — removed (not canon BVB usage) */
-    .logo-ring::before { display: none; }
+    /* Diagonal slash behind logo */
+    .logo-ring::before {
+      content: '';
+      position: absolute;
+      inset: 6px;
+      background: rgba(253,225,0,.05);
+      clip-path: polygon(30% 0%, 100% 0%, 70% 100%, 0% 100%);
+      border-radius: 2px;
+    }
     .logo-ring::after { display: none; }
     .logo-ring img {
       width: 80%;
@@ -395,6 +406,7 @@
       text-transform: uppercase;
       color: #444;
       white-space: nowrap;
+      line-height: 1;
     }
     .sponsor-line {
       flex: 1;
@@ -402,12 +414,16 @@
       background: rgba(255,255,255,.08);
     }
     .sponsor-img {
-      max-width: 160px;
+      max-width: 90px;
       height: auto;
+      display: block;
       opacity: .9;
       transition: opacity .2s;
     }
-    .sponsor-img:hover { opacity: 1; }
+    .sponsor-wrap a {
+      display: flex;
+      align-items: center;
+    }
 
     /* ─── FOOTER ─── */
     .footer {
@@ -457,10 +473,6 @@
 
     /* ─── LANGUAGE TOGGLE ─── */
     .lang-toggle {
-      position: fixed;
-      top: 14px;
-      right: 14px;
-      z-index: 100;
       display: flex;
       align-items: center;
       background: var(--grey2);
@@ -468,6 +480,9 @@
       border-radius: 2px;
       overflow: hidden;
       clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+      flex-shrink: 0;
+      position: absolute;
+      right: 0;
     }
     .lang-btn {
       appearance: none;
@@ -510,20 +525,18 @@
 
 <body>
 
-  <!-- Language toggle -->
-  <div class="lang-toggle" role="group" aria-label="Language">
-    <button class="lang-btn active" id="btn-de" onclick="setLang('de')">DE</button>
-    <span class="lang-divider"></span>
-    <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
-  </div>
-
   <main class="wrap">
 
-    <!-- Eyebrow -->
+    <!-- Eyebrow + language toggle -->
     <div class="eyebrow">
       <span class="eyebrow-line"></span>
       <span class="eyebrow-text" data-i18n="eyebrow">Gewinnspiel</span>
       <span class="eyebrow-line"></span>
+      <div class="lang-toggle" role="group" aria-label="Language">
+        <button class="lang-btn active" id="btn-de" onclick="setLang('de')">DE</button>
+        <span class="lang-divider"></span>
+        <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+      </div>
     </div>
 
     <!-- Hero -->
