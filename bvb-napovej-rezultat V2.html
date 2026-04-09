@@ -1,0 +1,765 @@
+<!doctype html>
+<html lang="de" id="htmlRoot">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>BVB – Predict the Score</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;0,900;1,900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --yellow:  #FDE100;
+      --yellow2: #E8FF00;
+      --black:   #0A0A0A;
+      --dark:    #111111;
+      --grey:    #1E1E1E;
+      --grey2:   #2A2A2A;
+      --muted:   #888888;
+      --text:    #FFFFFF;
+      --angle:   34deg;
+      --midcol:  clamp(18px,6vw,28px);
+      --logo-sz: clamp(96px,30vw,136px);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; min-height: 100%; }
+
+    /* ─── BACKGROUND ─── */
+    body {
+      font-family: 'Barlow', sans-serif;
+      color: var(--text);
+      background-color: var(--black);
+      min-height: 100dvh;
+      overflow-x: hidden;
+    }
+
+    /* Diagonal stripe texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: repeating-linear-gradient(
+        calc(90deg - var(--angle)),
+        rgba(253,225,0,.04) 0px,
+        rgba(253,225,0,.04) 1px,
+        transparent 1px,
+        transparent 28px
+      );
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Hero yellow diagonal slash – top of page */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -40px;
+      left: -10%;
+      width: 120%;
+      height: 340px;
+      background: var(--yellow);
+      clip-path: polygon(0 0, 100% 0, 100% 60%, 0 100%);
+      opacity: .07;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── WRAP ─── */
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 2rem 18px 3rem;
+    }
+
+    /* ─── HEADER BADGE ─── */
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .eyebrow-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--yellow) 60%, transparent);
+      opacity: .4;
+    }
+    .eyebrow-text {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--yellow);
+    }
+
+    /* ─── HERO ─── */
+    .hero { text-align: center; margin-bottom: 20px; }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: clamp(30px, 7vw, 42px);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      line-height: 1.1;
+      /* BVB: yellow headline */
+      color: var(--yellow);
+      /* Subtle diagonal cut effect via text-shadow */
+      text-shadow: 3px 3px 0 rgba(0,0,0,.6);
+    }
+
+    .hero p {
+      margin: 0;
+      font-size: clamp(13px, 3.5vw, 15px);
+      color: #AAAAAA;
+      line-height: 1.5;
+    }
+
+    /* ─── CARD ─── */
+    .card {
+      background: var(--grey);
+      border: 1px solid rgba(253,225,0,.14);
+      border-radius: 0;
+      padding: 20px 16px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Full-height yellow left accent bar */
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--yellow);
+    }
+
+    /* ─── MATCH HEADER BAR ─── */
+    .match-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+    .match-bar-inner {
+      background: var(--yellow);
+      color: var(--black);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      padding: 4px 14px;
+      clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+    }
+
+    /* ─── TEAMS ─── */
+    .teams {
+      display: grid;
+      grid-template-columns: 1fr clamp(28px,8vw,40px) 1fr;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 18px;
+    }
+    .team {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .logo-ring {
+      width: var(--logo-sz);
+      height: var(--logo-sz);
+      display: grid;
+      place-items: center;
+      position: relative;
+    }
+    /* Diagonal slash behind logo — removed (not canon BVB usage) */
+    .logo-ring::before { display: none; }
+    .logo-ring::after { display: none; }
+    .logo-ring img {
+      width: 80%;
+      height: 80%;
+      object-fit: contain;
+      position: relative;
+      z-index: 1;
+      /* BVB logo placeholder – white silhouette */
+      filter: drop-shadow(0 2px 8px rgba(0,0,0,.6));
+    }
+    .team-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 15px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text);
+      text-align: center;
+    }
+
+    /* VS badge */
+    .vs-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .vs-text {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: clamp(16px,5vw,22px);
+      color: var(--black);
+      background: var(--yellow);
+      letter-spacing: .06em;
+      line-height: 1;
+      padding: 5px 10px 4px;
+      clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+    }
+
+    /* ─── SCORE DIVIDER ─── */
+    .score-divider { display: none; }
+
+    /* ─── SCORE GRID ─── */
+    .score-grid {
+      display: grid;
+      grid-template-columns: 1fr clamp(20px,6vw,28px) 1fr;
+      align-items: center;
+      justify-items: center;
+      gap: 8px;
+      margin: 0 0 20px;
+    }
+    .scorebox {
+      display: grid;
+      grid-template-rows: auto auto auto;
+      align-items: center;
+      justify-items: center;
+      gap: 8px;
+      width: 100%;
+    }
+    /* Arrow buttons – angular, not round */
+    .arrow {
+      appearance: none;
+      border: 1px solid rgba(253,225,0,.35);
+      background: rgba(253,225,0,.07);
+      width: clamp(36px,10vw,44px);
+      height: clamp(36px,10vw,44px);
+      border-radius: 2px;
+      display: grid;
+      place-items: center;
+      font-size: clamp(13px,4vw,17px);
+      color: var(--yellow);
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+      clip-path: polygon(8% 0%, 100% 0%, 92% 100%, 0% 100%);
+    }
+    .arrow:hover {
+      background: var(--yellow);
+      color: var(--black);
+      border-color: var(--yellow);
+    }
+    .arrow:active { transform: translateY(1px); }
+
+    /* Big score number */
+    .scoreinput {
+      pointer-events: none;
+      user-select: none;
+      width: 100%;
+      text-align: center;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: clamp(64px,22vw,100px);
+      color: #fff;
+      background: transparent;
+      border: 0;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .colon {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(36px,10vw,52px);
+      font-weight: 900;
+      color: var(--yellow);
+      line-height: 1;
+      align-self: center;
+    }
+
+    /* ─── FIELDS ─── */
+    .fields {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .name-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .field span {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .field input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 0;
+      border: 1px solid rgba(253,225,0,.2);
+      border-bottom: 2px solid rgba(253,225,0,.35);
+      background: #141414;
+      color: #fff;
+      font-family: 'Barlow', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .field input::placeholder { color: #444; }
+    .field input:focus {
+      border-color: var(--yellow);
+      border-bottom-color: var(--yellow);
+      box-shadow: 0 2px 0 var(--yellow);
+    }
+
+    /* ─── CTA ─── */
+    .cta-wrap { margin-bottom: 6px; }
+    .cta {
+      width: 100%;
+      padding: 15px 20px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(17px,5vw,22px);
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--black);
+      background: var(--yellow);
+      border: 0;
+      /* Angular BVB clip shape */
+      clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+      cursor: pointer;
+      transition: background .2s, transform .08s;
+      position: relative;
+    }
+    .cta:hover { background: #ffe82a; }
+    .cta:active { transform: scaleY(.97); }
+
+    /* ─── ONE SUBMIT NOTE ─── */
+    .one-submit {
+      display: block;
+      text-align: center;
+      font-size: .7em;
+      color: var(--muted);
+      margin: 10px auto 6px;
+    }
+
+    /* ─── CONSENT ─── */
+    .consent {
+      display: flex;
+      align-items: flex-start;
+      gap: .6rem;
+      font-size: .72em;
+      color: #666;
+      line-height: 1.45;
+      margin: 10px 0;
+    }
+    .consent input {
+      width: 16px;
+      min-width: 16px;
+      margin-top: 2px;
+      accent-color: var(--yellow);
+    }
+    .consent a { color: var(--yellow); text-decoration: underline; }
+
+    /* ─── SPONSOR ─── */
+    .sponsor-wrap {
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .sponsor-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: #444;
+      white-space: nowrap;
+    }
+    .sponsor-line {
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,.08);
+    }
+    .sponsor-img {
+      max-width: 160px;
+      height: auto;
+      opacity: .9;
+      transition: opacity .2s;
+    }
+    .sponsor-img:hover { opacity: 1; }
+
+    /* ─── FOOTER ─── */
+    .footer {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: .65em;
+      color: #3A3A3A;
+      line-height: 1.5;
+      text-align: center;
+    }
+    .footer a { color: #555; text-decoration: underline; }
+    .footer a:hover { color: var(--yellow); }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .hero  { animation: fadeUp .5s ease both; }
+    .card  { animation: fadeUp .5s .1s ease both; }
+    .sponsor-wrap { animation: fadeUp .5s .2s ease both; }
+
+    /* Number spin flash */
+    @keyframes flash {
+      0%   { color: var(--yellow); }
+      100% { color: #fff; }
+    }
+    .scoreinput.flash { animation: flash .25s ease; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 380px) {
+      .name-row { grid-template-columns: 1fr; }
+    }
+
+    /* hide number spinners */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+
+    /* ─── SVG LOGO PLACEHOLDERS (inline, no external file needed) ─── */
+    .logo-bvb-placeholder {
+      width: 80%;
+      height: 80%;
+    }
+
+    /* ─── LANGUAGE TOGGLE ─── */
+    .lang-toggle {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      background: var(--grey2);
+      border: 1px solid rgba(253,225,0,.2);
+      border-radius: 2px;
+      overflow: hidden;
+      clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+    }
+    .lang-btn {
+      appearance: none;
+      border: 0;
+      background: transparent;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 7px 11px;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+      line-height: 1;
+    }
+    .lang-btn.active {
+      background: var(--yellow);
+      color: var(--black);
+    }
+    .lang-btn:not(.active):hover {
+      color: var(--yellow);
+    }
+    .lang-divider {
+      width: 1px;
+      height: 18px;
+      background: rgba(253,225,0,.2);
+      flex-shrink: 0;
+    }
+
+    /* ─── i18n text transition ─── */
+    [data-i18n] {
+      transition: opacity .18s ease;
+    }
+    body.lang-switching [data-i18n] {
+      opacity: 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Language toggle -->
+  <div class="lang-toggle" role="group" aria-label="Language">
+    <button class="lang-btn active" id="btn-de" onclick="setLang('de')">DE</button>
+    <span class="lang-divider"></span>
+    <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+  </div>
+
+  <main class="wrap">
+
+    <!-- Eyebrow -->
+    <div class="eyebrow">
+      <span class="eyebrow-line"></span>
+      <span class="eyebrow-text" data-i18n="eyebrow">Gewinnspiel</span>
+      <span class="eyebrow-line"></span>
+    </div>
+
+    <!-- Hero -->
+    <header class="hero">
+      <h1 data-i18n="hero_h1">Tipp das&nbsp;Ergebnis<br>und gewinn!</h1>
+      <p data-i18n="hero_p">Sag das Endergebnis voraus und gewinne ein exklusives Fanpaket von&nbsp;<strong style="color:#fff">Vodafone</strong>.</p>
+    </header>
+
+    <!-- Form -->
+    <form class="card" id="predictionForm" action="https://crm.bvb.de/form/submit?formId=1" method="post">
+
+      <!-- Match label -->
+      <div class="match-bar">
+        <span class="match-bar-inner" data-i18n="match_bar">Bundesliga · Signal Iduna Park</span>
+      </div>
+
+      <!-- Teams -->
+      <section class="teams" id="teams-section" aria-label="Mannschaften">
+
+        <div class="team">
+          <div class="logo-ring">
+            <img src="bvb-logo.svg" alt="Borussia Dortmund" class="logo-bvb-placeholder"/>
+          </div>
+          <span class="team-name">Borussia Dortmund</span>
+        </div>
+
+        <div class="vs-badge">
+          <span class="vs-text">VS</span>
+        </div>
+
+        <div class="team">
+          <div class="logo-ring">
+            <img src="bayern-logo.svg" alt="FC Bayern München" class="logo-bvb-placeholder"/>
+          </div>
+          <span class="team-name">FC Bayern München</span>
+        </div>
+
+      </section>
+
+      <div class="score-divider"></div>
+
+      <!-- Score selectors -->
+      <section class="score-grid" aria-label="Ergebnis">
+        <div class="scorebox" data-target="home">
+          <button class="arrow up" type="button" aria-label="Heimtore erhöhen">▲</button>
+          <input id="home" class="scoreinput" type="number" min="0" max="99" value="0" readonly/>
+          <button class="arrow down" type="button" aria-label="Heimtore verringern">▼</button>
+        </div>
+
+        <div class="colon">:</div>
+
+        <div class="scorebox" data-target="away">
+          <button class="arrow up" type="button" aria-label="Auswärtstore erhöhen">▲</button>
+          <input id="away" class="scoreinput" type="number" min="0" max="99" value="0" readonly/>
+          <button class="arrow down" type="button" aria-label="Auswärtstore verringern">▼</button>
+        </div>
+      </section>
+
+      <!-- Name fields -->
+      <div class="fields">
+        <div class="name-row">
+          <div class="field">
+            <span data-i18n="label_firstname">Vorname</span>
+            <input type="text" id="firstname" name="mauticform[firstname]" data-i18n-placeholder="placeholder_firstname" placeholder="Max" required/>
+          </div>
+          <div class="field">
+            <span data-i18n="label_lastname">Nachname</span>
+            <input type="text" id="lastname" name="mauticform[lastname]" data-i18n-placeholder="placeholder_lastname" placeholder="Mustermann" required/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="fields">
+        <div class="field">
+          <span data-i18n="label_email">E-Mail-Adresse</span>
+          <input type="email" id="email" name="email" data-i18n-placeholder="placeholder_email" placeholder="deine@email.de" required/>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <div class="cta-wrap">
+        <button class="cta" type="submit" data-i18n="cta">Tipp jetzt abgeben</button>
+      </div>
+      <span class="one-submit" data-i18n="one_submit">Du kannst deinen Tipp nur <strong>einmal</strong> abgeben.</span>
+
+      <!-- Consent -->
+      <label class="consent">
+        <input type="checkbox" name="mauticform[rules][]" value="ja" required/>
+        <span data-i18n="consent1">Ich stimme den <a href="https://www.bvb.de/game-rules">Teilnahmebedingungen</a> des Gewinnspiels „Tipp das Ergebnis" und der Datenschutzerklärung von Borussia Dortmund zu.</span>
+      </label>
+
+      <label class="consent">
+        <input type="checkbox" name="mauticform[newsletter][]" value="ja"/>
+        <span data-i18n="consent2">Ich bin damit einverstanden, dass Borussia Dortmund und Vodafone meine Daten nutzen, um mich über Vereinsnachrichten, Gewinnspiele und Fanaktionen zu informieren.</span>
+      </label>
+
+      <!-- Hidden Mautic fields -->
+      <input type="hidden" name="mauticform[email]"   id="m_email">
+      <input type="hidden" name="mauticform[domaci]"  id="m_domaci">
+      <input type="hidden" name="mauticform[gostje]"  id="m_gostje">
+      <input type="hidden" name="mauticform[formId]"  value="1">
+      <input type="hidden" name="mauticform[return]"  value="">
+
+    </form>
+
+    <!-- Sponsor -->
+    <div class="sponsor-wrap">
+      <span class="sponsor-label" data-i18n="sponsor_label">Präsentiert von</span>
+      <span class="sponsor-line"></span>
+      <a href="https://www.vodafone.de/" target="_blank" rel="noopener">
+        <img class="sponsor-img" src="https://www.bvb.de/content/experience-fragments/bvbweb/bvb_de/de/en/footer/master/_jcr_content/root/container_780377959/image.coreimg.png/1754319324466/logoleiste-footer-215x150px-1-vf.png" alt="Vodafone"/>
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span data-i18n="footer_legal">Mit dem Absenden bestätige ich, dass ich die Verarbeitung meiner personenbezogenen Daten zur Durchführung des Gewinnspiels zur Kenntnis genommen habe. Verantwortlicher ist Borussia Dortmund GmbH &amp; Co. KGaA.</span>
+      <span data-i18n="footer_links">
+        <a href="https://www.bvb.de/game-rules">Teilnahmebedingungen</a> &nbsp;|&nbsp;
+        <a href="https://www.bvb.de/privacy">Datenschutzerklärung</a> &nbsp;|&nbsp;
+        <a href="https://www.bvb.de/cookies">Cookie-Richtlinie</a>
+      </span>
+    </footer>
+
+  </main>
+
+  <script>
+    /* ─── TRANSLATIONS ─── */
+    const i18n = {
+      de: {
+        eyebrow:              'Gewinnspiel',
+        hero_h1:              'Tipp das&nbsp;Ergebnis<br>und gewinn!',
+        hero_p:               'Sag das Endergebnis voraus und gewinne ein exklusives Fanpaket von&nbsp;<strong style="color:#fff">Vodafone</strong>.',
+        match_bar:            'Bundesliga · Signal Iduna Park',
+        label_firstname:      'Vorname',
+        label_lastname:       'Nachname',
+        label_email:          'E-Mail-Adresse',
+        placeholder_firstname:'Max',
+        placeholder_lastname: 'Mustermann',
+        placeholder_email:    'deine@email.de',
+        cta:                  'Tipp jetzt abgeben',
+        one_submit:           'Du kannst deinen Tipp nur <strong>einmal</strong> abgeben.',
+        consent1:             'Ich stimme den <a href="https://www.bvb.de/game-rules">Teilnahmebedingungen</a> des Gewinnspiels „Tipp das Ergebnis" und der Datenschutzerklärung von Borussia Dortmund zu.',
+        consent2:             'Ich bin damit einverstanden, dass Borussia Dortmund und Vodafone meine Daten nutzen, um mich über Vereinsnachrichten, Gewinnspiele und Fanaktionen zu informieren.',
+        sponsor_label:        'Präsentiert von',
+        footer_legal:         'Mit dem Absenden bestätige ich, dass ich die Verarbeitung meiner personenbezogenen Daten zur Durchführung des Gewinnspiels zur Kenntnis genommen habe. Verantwortlicher ist Borussia Dortmund GmbH &amp; Co. KGaA.',
+        footer_links:         '<a href="https://www.bvb.de/game-rules">Teilnahmebedingungen</a> &nbsp;|&nbsp; <a href="https://www.bvb.de/privacy">Datenschutzerklärung</a> &nbsp;|&nbsp; <a href="https://www.bvb.de/cookies">Cookie-Richtlinie</a>',
+        doc_title:            'BVB – Tipp das Ergebnis',
+      },
+      en: {
+        eyebrow:              'Competition',
+        hero_h1:              'Predict the&nbsp;Score<br>and win!',
+        hero_p:               'Forecast the final result and win an exclusive fan package from&nbsp;<strong style="color:#fff">Vodafone</strong>.',
+        match_bar:            'Bundesliga · Signal Iduna Park',
+        label_firstname:      'First name',
+        label_lastname:       'Last name',
+        label_email:          'Email address',
+        placeholder_firstname:'John',
+        placeholder_lastname: 'Smith',
+        placeholder_email:    'your@email.com',
+        cta:                  'Submit your prediction',
+        one_submit:           'You can submit your prediction only <strong>once</strong>.',
+        consent1:             'I agree to the <a href="https://www.bvb.de/game-rules">terms and conditions</a> of the "Predict the Score" competition and the Borussia Dortmund privacy policy.',
+        consent2:             'I consent to Borussia Dortmund and Vodafone using my contact details to send me occasional club news, competitions and fan offers.',
+        sponsor_label:        'Presented by',
+        footer_legal:         'By submitting I confirm that I have acknowledged the processing of my personal data for the purpose of conducting this competition. The data controller is Borussia Dortmund GmbH &amp; Co. KGaA.',
+        footer_links:         '<a href="https://www.bvb.de/game-rules">Terms &amp; Conditions</a> &nbsp;|&nbsp; <a href="https://www.bvb.de/privacy">Privacy Policy</a> &nbsp;|&nbsp; <a href="https://www.bvb.de/cookies">Cookie Policy</a>',
+        doc_title:            'BVB – Predict the Score',
+      }
+    };
+
+    let currentLang = 'de';
+
+    function setLang(lang) {
+      if (lang === currentLang) return;
+      currentLang = lang;
+
+      // Fade out
+      document.body.classList.add('lang-switching');
+
+      setTimeout(() => {
+        applyLang(lang);
+        // Fade back in
+        document.body.classList.remove('lang-switching');
+      }, 180);
+    }
+
+    function applyLang(lang) {
+      const t = i18n[lang];
+
+      // Update <html lang>
+      document.getElementById('htmlRoot').lang = lang;
+
+      // Update page title
+      document.title = t.doc_title;
+
+      // Update all [data-i18n] elements (innerHTML)
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        if (t[key] !== undefined) el.innerHTML = t[key];
+      });
+
+      // Update all [data-i18n-placeholder] inputs
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.dataset.i18nPlaceholder;
+        if (t[key] !== undefined) el.placeholder = t[key];
+      });
+
+      // Toggle active class on buttons
+      document.getElementById('btn-de').classList.toggle('active', lang === 'de');
+      document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    }
+
+    /* ─── SCORE CONTROLS ─── */
+    const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+
+    document.querySelectorAll('.scorebox').forEach(box => {
+      const input = box.querySelector('.scoreinput');
+      box.addEventListener('click', e => {
+        const btn = e.target.closest('.arrow');
+        if (!btn) return;
+        if (btn.classList.contains('up'))   input.value = clamp(+input.value + 1, 0, 99);
+        if (btn.classList.contains('down')) input.value = clamp(+input.value - 1, 0, 99);
+        input.classList.remove('flash');
+        void input.offsetWidth;
+        input.classList.add('flash');
+      });
+    });
+
+    /* ─── FORM SUBMIT – copy to Mautic hidden fields ─── */
+    document.getElementById('predictionForm').addEventListener('submit', () => {
+      document.getElementById('m_email').value  = document.getElementById('email').value;
+      document.getElementById('m_domaci').value = document.getElementById('home').value;
+      document.getElementById('m_gostje').value = document.getElementById('away').value;
+    });
+  </script>
+</body>
+</html>
