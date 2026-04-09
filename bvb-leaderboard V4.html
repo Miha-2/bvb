@@ -618,11 +618,16 @@
     }).sort((a, b) => b.pts - a.pts);
 
     // Extra pool for paginated rows (positions 4–99)
-    const extraPool = Array.from({length: 96}, (_, i) => ({
-      name: nicknames[(i + 3) % nicknames.length] + (i >= nicknames.length ? `_${Math.floor(i/nicknames.length)}` : ''),
-      pts:  Math.max(1, entries[0].pts - 4 - i * Math.floor(Math.random() * 3 + 1)),
-      trend: trends[i % trends.length],
-    }));
+    const extraPool = [];
+    let lastPts = entries[2].pts; // start just below 3rd place
+    for (let i = 0; i < 96; i++) {
+      lastPts = Math.max(1, lastPts - Math.floor(Math.random() * 3 + 1));
+      extraPool.push({
+        name: nicknames[(i + 3) % nicknames.length] + (i >= nicknames.length ? `_${Math.floor(i/nicknames.length)}` : ''),
+        pts: lastPts,
+        trend: trends[i % trends.length],
+      });
+    }
 
     /* ─── RENDER PODIUM ─── */
     const podiumOrder = [1, 0, 2]; // visual: 2nd | 1st | 3rd
