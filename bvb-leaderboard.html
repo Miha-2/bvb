@@ -64,14 +64,12 @@
 
     /* ─── LANG TOGGLE ─── */
     .lang-toggle {
-      position: fixed;
-      top: 14px; right: 14px;
-      z-index: 100;
       display: flex;
       align-items: center;
       background: var(--grey2);
       border: 1px solid rgba(253,225,0,.2);
       clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+      flex-shrink: 0;
     }
     .lang-btn {
       appearance: none; border: 0; background: transparent;
@@ -88,9 +86,17 @@
     /* ─── WRAP ─── */
     .wrap {
       position: relative; z-index: 1;
-      max-width: 640px;
+      max-width: 520px; /* match prediction form width */
       margin: 0 auto;
-      padding: 2rem 18px 3rem;
+      padding: 2rem 18px calc(3rem + env(safe-area-inset-bottom));
+    }
+
+    /* ─── NAV ROW ─── */
+    .nav-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
     }
 
     /* ─── EYEBROW ─── */
@@ -124,29 +130,30 @@
 
     /* ─── MATCH CONTEXT BAR ─── */
     .match-context {
-      display: flex; align-items: center;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: 1fr auto; /* score never wraps — always pinned right */
+      align-items: center;
       background: var(--grey);
       border: 1px solid rgba(253,225,0,.12);
       border-left: 4px solid var(--yellow);
       padding: 12px 16px;
       margin-bottom: 24px;
-      gap: 12px;
+      gap: 0 12px;
     }
     .match-teams {
       font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 800; font-size: 16px;
+      font-weight: 800; font-size: clamp(13px, 3.8vw, 16px);
       text-transform: uppercase; letter-spacing: .05em;
     }
     .match-score-badge {
       font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 900; font-size: 22px;
+      font-weight: 900; font-size: clamp(18px, 5vw, 22px);
       color: var(--yellow); letter-spacing: .08em;
       white-space: nowrap;
     }
     .match-meta {
-      font-size: 11px; font-weight: 600;
-      letter-spacing: .1em; text-transform: uppercase;
+      font-size: clamp(9px, 2.4vw, 11px); font-weight: 600;
+      letter-spacing: .08em; text-transform: uppercase;
       color: var(--muted); margin-top: 2px;
     }
 
@@ -155,7 +162,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       align-items: flex-end;
-      gap: 8px;
+      gap: 6px;
       margin-bottom: 28px;
     }
     .podium-card {
@@ -164,41 +171,42 @@
       background: var(--grey);
       border: 1px solid rgba(253,225,0,.1);
       border-bottom: 3px solid transparent;
-      padding: 16px 10px 12px;
+      padding: clamp(10px,3vw,16px) 6px clamp(10px,3vw,12px);
       position: relative;
       transition: transform .2s;
+      min-width: 0; /* allow shrinking */
     }
     .podium-card:hover { transform: translateY(-2px); }
 
-    /* rank colours */
     .podium-card.rank-1 {
       border-bottom-color: var(--gold);
       background: #1f1d0e;
       border-color: rgba(253,225,0,.25);
-      padding-top: 22px;
+      padding-top: clamp(14px,4vw,22px);
     }
     .podium-card.rank-2 { border-bottom-color: var(--silver); }
     .podium-card.rank-3 { border-bottom-color: var(--bronze); }
 
     .podium-rank {
       font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 900; font-size: clamp(28px, 8vw, 42px);
+      font-weight: 900;
+      font-size: clamp(22px, 6vw, 38px); /* tighter min so 320px doesn't overflow */
       line-height: 1;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
     .rank-1 .podium-rank { color: var(--gold); }
     .rank-2 .podium-rank { color: var(--silver); }
     .rank-3 .podium-rank { color: var(--bronze); }
 
     .podium-avatar {
-      width: clamp(40px,12vw,56px); height: clamp(40px,12vw,56px);
+      width: clamp(34px,9vw,52px); height: clamp(34px,9vw,52px);
       border-radius: 0;
       background: var(--grey2);
       display: grid; place-items: center;
       font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 900; font-size: clamp(16px,5vw,22px);
+      font-weight: 900; font-size: clamp(13px,4vw,20px);
       color: var(--yellow);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       clip-path: polygon(8% 0%, 100% 0%, 92% 100%, 0% 100%);
       border: 1px solid rgba(253,225,0,.15);
     }
@@ -209,128 +217,167 @@
 
     .podium-name {
       font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 800; font-size: clamp(13px,4vw,16px);
+      font-weight: 800; font-size: clamp(11px,3vw,14px);
       text-transform: uppercase; letter-spacing: .04em;
       text-align: center; color: var(--text);
       margin-bottom: 4px;
+      /* truncate long nicknames */
+      width: 100%;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .podium-pts {
       font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 900; font-size: clamp(18px,5vw,24px);
+      font-weight: 900; font-size: clamp(16px,4.5vw,22px);
       color: var(--yellow); line-height: 1;
+      display: flex; align-items: baseline; gap: 3px;
     }
     .podium-pts-label {
       font-size: 10px; font-weight: 600;
       letter-spacing: .1em; text-transform: uppercase;
       color: var(--muted);
     }
-    .podium-prediction {
-      font-size: 11px; color: #555;
-      margin-top: 4px; letter-spacing: .04em;
-    }
 
-    /* crown on #1 */
-    .podium-card.rank-1::before {
-      content: '👑';
-      position: absolute; top: -14px; left: 50%;
-      transform: translateX(-50%);
-      font-size: 20px;
-    }
+    /* crown removed */
+    .podium-card.rank-1::before { display: none; }
 
     /* ─── LEADERBOARD TABLE ─── */
     .lb-header {
-      display: flex; align-items: center;
+      display: flex; align-items: stretch;
       justify-content: space-between;
-      margin-bottom: 10px;
-      padding: 0 4px;
+      margin-bottom: 0; padding: 0;
     }
     .lb-title {
       font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 800; font-size: 14px;
-      text-transform: uppercase; letter-spacing: .12em;
-      color: var(--muted);
+      font-weight: 900; font-size: 11px;
+      text-transform: uppercase; letter-spacing: .16em;
+      color: var(--black);
+      background: var(--yellow);
+      padding: 5px 20px 5px 12px;
+      clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0% 100%);
     }
     .lb-count {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 12px; font-weight: 700;
-      color: #444; letter-spacing: .08em;
+      font-size: 11px; font-weight: 900;
+      letter-spacing: .16em; text-transform: uppercase;
+      color: var(--black);
+      background: var(--yellow);
+      padding: 5px 12px 5px 20px;
+      clip-path: polygon(10px 0%, 100% 0%, 100% 100%, 0% 100%);
     }
 
-    .lb-table {
-      display: flex; flex-direction: column; gap: 3px;
-    }
+    .lb-table { display: flex; flex-direction: column; gap: 0; }
 
     .lb-row {
+      position: relative;
       display: grid;
-      grid-template-columns: 36px 1fr auto auto;
+      grid-template-columns: clamp(58px,16vw,76px) 1fr auto;
       align-items: center;
-      gap: 12px;
-      background: var(--grey);
-      border: 1px solid rgba(255,255,255,.04);
-      border-left: 4px solid transparent;
-      padding: 10px 14px 10px 10px;
-      transition: border-left-color .15s, background .15s;
+      gap: 0;
+      overflow: hidden;
       cursor: default;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+      min-height: 54px;
+      background: var(--grey);
+      transition: background .15s;
     }
-    .lb-row:hover {
-      background: #222;
-      border-left-color: rgba(253,225,0,.3);
-    }
+    .lb-row:nth-child(even) { background: #181818; }
+    .lb-row:hover           { background: #242424; }
+
+    .lb-row::after { display: none; }
+
+    /* "Du" / highlight row */
     .lb-row.highlight {
-      background: #1f1d0e;
-      border-left-color: var(--yellow);
-      border-color: rgba(253,225,0,.18);
+      background: var(--yellow) !important;
+      border-bottom-color: rgba(0,0,0,.1);
     }
+    .lb-row.highlight .lb-pos        { color: rgba(0,0,0,.18); }
+    .lb-row.highlight .lb-name       { color: var(--black); }
+    .lb-row.highlight .lb-trend      { color: rgba(0,0,0,.4); }
+    .lb-row.highlight .lb-pts        { color: var(--black); }
+    .lb-row.highlight .lb-you-tag    { background: var(--black); color: var(--yellow); }
 
     .lb-pos {
+      position: relative; z-index: 1;
       font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 900; font-size: 18px;
-      color: var(--muted); text-align: center; line-height: 1;
+      font-weight: 900;
+      font-size: clamp(20px, 5vw, 34px);
+      line-height: 1;
+      text-align: center;
+      color: rgba(255,255,255,.22);
+      user-select: none;
+      letter-spacing: -.02em;
     }
-    .lb-row.highlight .lb-pos { color: var(--yellow); }
 
+    /* Name block */
+    .lb-info {
+      position: relative; z-index: 1;
+      padding: 10px 6px 10px 12px;
+      min-width: 0;
+    }
     .lb-name {
       font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 800; font-size: 16px;
+      font-weight: 800; font-size: clamp(14px, 3.8vw, 18px);
       text-transform: uppercase; letter-spacing: .04em;
       color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .lb-sub {
-      font-size: 11px; font-weight: 500;
-      color: var(--muted); letter-spacing: .03em;
-      margin-top: 1px;
-    }
-    .lb-row.highlight .lb-name { color: var(--yellow); }
-
-    .lb-pred {
+    .lb-row.highlight .lb-name { color: var(--black); }
+    .lb-you-tag {
+      display: inline-block;
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 14px; font-weight: 700;
-      color: #555; letter-spacing: .06em;
-      white-space: nowrap;
+      font-size: 10px; font-weight: 900;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: var(--black); background: var(--yellow);
+      padding: 1px 6px; margin-top: 3px;
+      clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
     }
-
-    .lb-pts {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 900; font-size: 20px;
-      color: var(--text); text-align: right; line-height: 1;
-      white-space: nowrap;
-      min-width: 48px;
-    }
-    .lb-row.highlight .lb-pts { color: var(--yellow); }
-    .lb-pts span {
-      font-size: 10px; font-weight: 700;
-      letter-spacing: .1em; text-transform: uppercase;
-      color: var(--muted); margin-left: 2px;
-    }
-
-    /* trend arrow */
-    .lb-trend {
-      font-size: 10px; margin-left: 4px;
-      vertical-align: middle;
-    }
+    .lb-trend { font-size: 10px; margin-left: 6px; vertical-align: middle; }
     .up   { color: #3ddc84; }
     .down { color: #ff4d4d; }
-    .same { color: #555; }
+    .same { color: #333; }
+
+    /* Points column */
+    .lb-pts-col {
+      position: relative; z-index: 1;
+      padding: 0 14px 0 8px;
+      text-align: right; white-space: nowrap;
+    }
+    .lb-pts {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900; font-size: clamp(22px, 5vw, 28px);
+      color: var(--text); line-height: 1;
+    }
+
+    /* ─── YOU CONTEXT (sticky user row) ─── */
+    .you-context {
+      position: sticky;
+      bottom: 0;
+      z-index: 10;
+      margin: 0 -18px;
+      padding: 28px 18px 0;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      background: linear-gradient(to bottom, transparent 0%, var(--black) 28px);
+    }
+    .you-gap {
+      display: flex; align-items: center;
+      gap: 10px; padding: 6px 0 4px;
+    }
+    .you-gap::before, .you-gap::after {
+      content: ''; flex: 1; height: 1px;
+      background: rgba(253,225,0,.15);
+    }
+    .you-gap-text {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: .14em; text-transform: uppercase;
+      color: rgba(253,225,0,.4); white-space: nowrap;
+      transition: color .15s;
+    }
+    .you-gap-text:hover { color: var(--yellow); }
+    #lb-you .lb-row.neighbour {
+      background: #161616; opacity: .7;
+    }
+    #lb-you .lb-row.neighbour:hover { opacity: 1; }
 
     /* ─── LOAD MORE ─── */
     .load-more-wrap { margin-top: 16px; text-align: center; }
@@ -345,7 +392,9 @@
       clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
       transition: background .15s, color .15s;
     }
-    .load-more:hover { background: var(--yellow); color: var(--black); }
+    @media (hover: hover) {
+      .load-more:hover { background: var(--yellow); color: var(--black); }
+    }
 
     /* ─── NAV LINK BACK ─── */
     .nav-back {
@@ -354,7 +403,6 @@
       font-size: 13px; font-weight: 700;
       letter-spacing: .1em; text-transform: uppercase;
       color: var(--muted); text-decoration: none;
-      margin-bottom: 20px;
       transition: color .15s;
     }
     .nav-back:hover { color: var(--yellow); }
@@ -398,22 +446,23 @@
 
     @media (max-width: 400px) {
       .lb-pred { display: none; }
-      .lb-row  { grid-template-columns: 30px 1fr auto; }
+      .lb-row  { grid-template-columns: 44px 1fr auto; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Language toggle -->
-  <div class="lang-toggle" role="group" aria-label="Language">
-    <button class="lang-btn active" id="btn-de" onclick="setLang('de')">DE</button>
-    <span class="lang-divider"></span>
-    <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
-  </div>
-
   <main class="wrap">
 
-    <a class="nav-back" href="bvb-napovej-rezultat.html" data-i18n="nav_back">Zurück zur Vorhersage</a>
+    <div class="nav-row">
+      <a class="nav-back" href="bvb-napovej-rezultat.html" data-i18n="nav_back">Zurück zur Vorhersage</a>
+      <!-- Language toggle -->
+      <div class="lang-toggle" role="group" aria-label="Language">
+        <button class="lang-btn active" id="btn-de" onclick="setLang('de')">DE</button>
+        <span class="lang-divider"></span>
+        <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+      </div>
+    </div>
 
     <!-- Eyebrow -->
     <div class="eyebrow">
@@ -425,7 +474,7 @@
     <!-- Hero -->
     <header class="hero">
       <h1 data-i18n="hero_h1">Rangliste</h1>
-      <p data-i18n="hero_p">BVB vs. FC Bayern München · Bundesliga</p>
+
     </header>
 
     <!-- Match context -->
@@ -434,7 +483,8 @@
         <div class="match-teams">BVB <span style="color:var(--muted);font-weight:700">vs</span> FC Bayern</div>
         <div class="match-meta" data-i18n="match_meta">Bundesliga · Signal Iduna Park · 12. Apr 2025</div>
       </div>
-      <div style="text-align:right">
+
+      <div style="text-align:center;flex-shrink:0">
         <div class="match-score-badge">2 : 1</div>
         <div class="match-meta" data-i18n="match_result_label">Endergebnis</div>
       </div>
@@ -446,13 +496,19 @@
     <!-- Full leaderboard -->
     <div class="lb-header">
       <span class="lb-title" data-i18n="lb_title">Alle Teilnehmer</span>
-      <span class="lb-count" id="lb-count"></span>
+      <span class="lb-count" data-i18n="pts_col_label">Pkt</span>
     </div>
 
     <div class="lb-table" id="lb-table"></div>
 
     <div class="load-more-wrap">
-      <button class="load-more" data-i18n="load_more">Mehr laden</button>
+      <button class="load-more" id="load-more-btn" data-i18n="load_more">Mehr laden</button>
+    </div>
+
+    <!-- Sticky user position context — always visible -->
+    <div class="you-context" id="you-context">
+      <div class="you-gap" id="you-gap"></div>
+      <div class="lb-table" id="lb-you"></div>
     </div>
 
     <footer class="footer">
@@ -480,6 +536,8 @@
         lb_title:           'Alle Teilnehmer',
         load_more:          'Mehr laden',
         pts_label:          'Pkt',
+        pts_col_label:      'Pkt',
+
         pred_label:         'Tipp',
         footer_predict:     'Vorhersage abgeben',
         doc_title:          'BVB – Rangliste',
@@ -494,6 +552,8 @@
         lb_title:           'All participants',
         load_more:          'Load more',
         pts_label:          'pts',
+        pts_col_label:      'Pts',
+
         pred_label:         'Pred',
         doc_title:          'BVB – Leaderboard',
       }
@@ -524,11 +584,16 @@
     }
 
     /* ─── MOCK DATA ─── */
-    const firstNames = ['Marco','Leon','Felix','Thomas','Kai','Julian','Lukas','Jonas','Noah','Liam',
-                        'Emma','Mia','Sofia','Anna','Laura','Sarah','Jana','Lea','Nina','Lena',
-                        'Sebastian','Maximilian','David','Andreas','Stefan','Michael','Christian','Tobias','Daniel','Florian'];
-    const lastNames  = ['Müller','Schmidt','Schneider','Fischer','Weber','Meyer','Wagner','Becker','Hoffmann','Koch',
-                        'Richter','Klein','Wolf','Schröder','Neumann','Schwarz','Zimmermann','Braun','Krüger','Hofmann'];
+    const nicknames = [
+      'BVB_Franky','GelbeWand09','SignalIduna7','DortmundDevil',
+      'EchteLiebe88','BlackYellow4ever','Südtribüne1','HammerKalle',
+      'RuhrpottKing','BVBultras09','Borussenfan','DerEchte09',
+      'WallBanger','KeepingItYellow','NordkurveNiko','Borusse1909',
+      'TigerTorsten','RevierBoss','GelberSturm','MiaSanNix',
+      'DortmundPride','SchwartzGelb','KloppoForever','09forever',
+      'RuhrpottRocker','BVBTifoso','WestfalenWolf','IdunaPark23',
+      'DerBVBler','EchterBorusse'
+    ];
 
     const trends = ['up','up','same','down','up','same','same','down','up','down',
                     'same','up','down','same','up','down','up','same','down','up'];
@@ -536,21 +601,33 @@
     function randScore() {
       return `${Math.floor(Math.random()*5)} : ${Math.floor(Math.random()*5)}`;
     }
-    function initials(fn, ln) { return (fn[0] + ln[0]).toUpperCase(); }
+    function initials(nick) {
+      return nick.replace(/[^a-zA-Z]/g, '').slice(0,2).toUpperCase();
+    }
 
-    // Generate 20 mock entries, sorted by points desc
     const entries = Array.from({length: 20}, (_, i) => {
-      const fn = firstNames[Math.floor(Math.random() * firstNames.length)];
-      const ln = lastNames[Math.floor(Math.random() * lastNames.length)];
+      const nick = nicknames[i % nicknames.length];
       return {
-        name: fn + ' ' + ln[0] + '.',
-        initials: initials(fn, ln),
+        name: nick,
+        initials: initials(nick),
         pts: Math.floor(Math.random() * 80) + 20,
         pred: randScore(),
         trend: trends[i % trends.length],
-        highlight: i === 7, // mock "your position"
+        highlight: i === 7,
       };
     }).sort((a, b) => b.pts - a.pts);
+
+    // Extra pool for paginated rows (positions 4–99)
+    const extraPool = [];
+    let lastPts = entries[2].pts; // start just below 3rd place
+    for (let i = 0; i < 96; i++) {
+      lastPts = Math.max(1, lastPts - Math.floor(Math.random() * 3 + 1));
+      extraPool.push({
+        name: nicknames[(i + 3) % nicknames.length] + (i >= nicknames.length ? `_${Math.floor(i/nicknames.length)}` : ''),
+        pts: lastPts,
+        trend: trends[i % trends.length],
+      });
+    }
 
     /* ─── RENDER PODIUM ─── */
     const podiumOrder = [1, 0, 2]; // visual: 2nd | 1st | 3rd
@@ -565,8 +642,7 @@
           <div class="podium-rank">${rank}</div>
           <div class="podium-avatar" style="color:${rankColors[rank]}">${e.initials}</div>
           <div class="podium-name">${e.name}</div>
-          <div class="podium-pts">${e.pts}<br><span class="podium-pts-label pts-label">Pkt</span></div>
-          <div class="podium-prediction pred-col-label" style="font-size:10px;color:#555;margin-top:4px;letter-spacing:.04em">Tipp: ${e.pred}</div>
+          <div class="podium-pts">${e.pts} <span class="podium-pts-label pts-label">Pkt</span></div>
         </div>`;
     });
 
@@ -574,23 +650,84 @@
     const cards = podiumEl.querySelectorAll('.podium-card');
     // cards are rendered as [2nd, 1st, 3rd] — correct order in grid
 
-    /* ─── RENDER TABLE (rows 4–20) ─── */
+    /* ─── RENDER TABLE (rows 4+) ─── */
     const tableEl  = document.getElementById('lb-table');
-    const countEl  = document.getElementById('lb-count');
-    countEl.textContent = `${entries.length} Teilnehmer`;
+    const PAGE_SIZE = 10;
+    const YOU_POS  = 1909;
+    let visibleCount = 0;
 
-    entries.slice(3).forEach((e, i) => {
-      const pos = i + 4;
-      const trendIcon = { up: '▲', down: '▼', same: '—' }[e.trend];
-      tableEl.innerHTML += `
-        <div class="lb-row ${e.highlight ? 'highlight' : ''}">
+    function appendRows(from, to) {
+      extraPool.slice(from, to).forEach((e, i) => {
+        const pos = from + i + 4;
+        const trendIcon = { up: '▲', down: '▼', same: '—' }[e.trend];
+        const row = document.createElement('div');
+        row.className = 'lb-row';
+        row.innerHTML = `
           <div class="lb-pos">${pos}</div>
-          <div>
+          <div class="lb-info">
             <div class="lb-name">${e.name} <span class="lb-trend ${e.trend}">${trendIcon}</span></div>
-            <div class="lb-sub">${e.highlight ? '← Du' : ''}</div>
           </div>
-          <div class="lb-pred pred-col-label" style="font-size:11px;color:#555;">Tipp: ${e.pred}</div>
-          <div class="lb-pts">${e.pts}<span class="pts-label"> Pkt</span></div>
+          <div class="lb-pts-col">
+            <span class="lb-pts">${e.pts}</span>
+          </div>`;
+        tableEl.appendChild(row);
+      });
+    }
+
+    function loadMore() {
+      const from = visibleCount;
+      const to   = Math.min(visibleCount + PAGE_SIZE, extraPool.length);
+      appendRows(from, to);
+      visibleCount = to;
+
+      const btn = document.getElementById('load-more-btn');
+      if (visibleCount >= extraPool.length) {
+        btn.style.display = 'none';
+      } else {
+        btn.textContent = i18n[currentLang].load_more;
+      }
+    }
+
+    // Initial load
+    loadMore();
+
+    document.getElementById('load-more-btn').addEventListener('click', loadMore);
+
+    /* ─── YOU CONTEXT (1909th place mock) ─── */
+    const youEntry = { name: 'DerBVBler', pts: 7, trend: 'down', initials: 'DB' };
+    const above    = { name: 'RuhrpottRocker', pts: 8, trend: 'same' };
+    const below    = { name: 'WestfalenWolf',  pts: 6, trend: 'up'   };
+
+    const youGapEl = document.getElementById('you-gap');
+    const youEl    = document.getElementById('lb-you');
+
+    youGapEl.innerHTML = `<span class="you-gap-text" id="you-gap-text" data-i18n="you_position" style="cursor:pointer">↓ Deine Position</span>`;
+
+    document.getElementById('you-gap-text').addEventListener('click', () => {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    });
+
+
+
+    const youRows = [
+      { e: above,    pos: YOU_POS - 1, cls: 'neighbour' },
+      { e: youEntry, pos: YOU_POS,     cls: 'highlight'  },
+      { e: below,    pos: YOU_POS + 1, cls: 'neighbour'  },
+    ];
+
+    youRows.forEach(({ e, pos, cls }) => {
+      const trendIcon = { up: '▲', down: '▼', same: '—' }[e.trend];
+      const youTag = cls === 'highlight' ? `<span class="lb-you-tag">Du</span>` : '';
+      youEl.innerHTML += `
+        <div class="lb-row ${cls}">
+          <div class="lb-pos">${pos}</div>
+          <div class="lb-info">
+            <div class="lb-name">${e.name} <span class="lb-trend ${e.trend}">${trendIcon}</span></div>
+            ${youTag}
+          </div>
+          <div class="lb-pts-col">
+            <span class="lb-pts">${e.pts}</span>
+          </div>
         </div>`;
     });
   </script>
