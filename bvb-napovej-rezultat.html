@@ -77,6 +77,24 @@
       flex-direction: column;
     }
 
+    /* ─── NAV ROW ─── */
+    .nav-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .nav-back {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); text-decoration: none;
+      transition: color .15s;
+    }
+    .nav-back:hover { color: var(--yellow); }
+    .nav-back::before { content: '→'; font-size: 16px; }
+
     /* ─── HEADER BADGE ─── */
     .eyebrow {
       display: flex;
@@ -84,8 +102,6 @@
       justify-content: center;
       gap: 8px;
       margin-bottom: 14px;
-      position: relative;
-      padding: 0 80px;
     }
     .eyebrow-line {
       flex: 1;
@@ -362,7 +378,31 @@
     .cta:hover { background: #ffe82a; }
     .cta:active { transform: scaleY(.97); }
 
-    /* ─── ONE SUBMIT NOTE ─── */
+    /* ─── LEADERBOARD LINK ─── */
+    .cta-leaderboard {
+      display: block;
+      width: 100%;
+      margin-top: 14px;
+      padding: 13px 20px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(15px,4.5vw,19px);
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      text-align: center;
+      text-decoration: none;
+      color: var(--yellow);
+      background: transparent;
+      border: 1px solid rgba(253,225,0,.35);
+      clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+      transition: background .2s, color .2s;
+    }
+    .cta-leaderboard:hover {
+      background: rgba(253,225,0,.08);
+      border-color: rgba(253,225,0,.6);
+    }
+
+
     .one-submit {
       display: block;
       text-align: center;
@@ -486,8 +526,6 @@
       overflow: hidden;
       clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
       flex-shrink: 0;
-      position: absolute;
-      right: 0;
     }
     .lang-btn {
       appearance: none;
@@ -532,16 +570,21 @@
 
   <main class="wrap">
 
-    <!-- Eyebrow + language toggle -->
-    <div class="eyebrow">
-      <span class="eyebrow-line"></span>
-      <span class="eyebrow-text" data-i18n="eyebrow">Gewinnspiel</span>
-      <span class="eyebrow-line"></span>
+    <!-- Nav row -->
+    <div class="nav-row">
+      <a class="nav-back" href="bvb-leaderboard.html" data-i18n="nav_leaderboard">Zur Rangliste</a>
       <div class="lang-toggle" role="group" aria-label="Language">
         <button class="lang-btn active" id="btn-de" onclick="setLang('de')">DE</button>
         <span class="lang-divider"></span>
         <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
       </div>
+    </div>
+
+    <!-- Eyebrow -->
+    <div class="eyebrow">
+      <span class="eyebrow-line"></span>
+      <span class="eyebrow-text" data-i18n="eyebrow">Gewinnspiel</span>
+      <span class="eyebrow-line"></span>
     </div>
 
     <!-- Hero -->
@@ -648,6 +691,9 @@
 
     </form>
 
+    <!-- Leaderboard link -->
+    <a class="cta-leaderboard" href="bvb-leaderboard.html" data-i18n="nav_leaderboard">Zur Rangliste</a>
+
     <!-- Sponsor -->
     <div class="sponsor-wrap">
       <span class="sponsor-label" data-i18n="sponsor_label">Präsentiert von</span>
@@ -688,6 +734,7 @@
         consent1:             'Ich stimme den <a href="https://www.bvb.de/game-rules">Teilnahmebedingungen</a> des Gewinnspiels „Tipp das Ergebnis" und der Datenschutzerklärung von Borussia Dortmund zu.',
         consent2:             'Ich bin damit einverstanden, dass Borussia Dortmund und Vodafone meine Daten nutzen, um mich über Vereinsnachrichten, Gewinnspiele und Fanaktionen zu informieren.',
         sponsor_label:        'Präsentiert von',
+        nav_leaderboard:      'Zur Rangliste',
         footer_legal:         'Mit dem Absenden bestätige ich, dass ich die Verarbeitung meiner personenbezogenen Daten zur Durchführung des Gewinnspiels zur Kenntnis genommen habe. Verantwortlicher ist Borussia Dortmund GmbH &amp; Co. KGaA.',
         footer_links:         '<a href="https://www.bvb.de/game-rules">Teilnahmebedingungen</a> &nbsp;|&nbsp; <a href="https://www.bvb.de/privacy">Datenschutzerklärung</a> &nbsp;|&nbsp; <a href="https://www.bvb.de/cookies">Cookie-Richtlinie</a>',
         doc_title:            'BVB – Tipp das Ergebnis',
@@ -708,6 +755,7 @@
         consent1:             'I agree to the <a href="https://www.bvb.de/game-rules">terms and conditions</a> of the "Predict the Score" competition and the Borussia Dortmund privacy policy.',
         consent2:             'I consent to Borussia Dortmund and Vodafone using my contact details to send me occasional club news, competitions and fan offers.',
         sponsor_label:        'Presented by',
+        nav_leaderboard:      'View leaderboard',
         footer_legal:         'By submitting I confirm that I have acknowledged the processing of my personal data for the purpose of conducting this competition. The data controller is Borussia Dortmund GmbH &amp; Co. KGaA.',
         footer_links:         '<a href="https://www.bvb.de/game-rules">Terms &amp; Conditions</a> &nbsp;|&nbsp; <a href="https://www.bvb.de/privacy">Privacy Policy</a> &nbsp;|&nbsp; <a href="https://www.bvb.de/cookies">Cookie Policy</a>',
         doc_title:            'BVB – Predict the Score',
